@@ -38,13 +38,16 @@ for i in Agg_state_list:
               clm['Year'].append(j)
               clm['Quater'].append(int(k.strip('.json')))
 #Succesfully created a dataframe
-Aggregated_transaction=pd.DataFrame(clm)
+aggregated_transaction=pd.DataFrame(clm)
 
 =================================================================================================================================================================================================
+path = "/content/pulse/data/aggregated/user/country/india/state"
+agg_user_list = os.listdir(path)
+
 agg_user_detail = {'State':[],'Year':[],'Quarter':[],'Brand':[],'User_Count':[],'User_Percentage':[]}
 
 for state in agg_user_list:
-    cur_state = agg_user_path+'/'+state+'/'
+    cur_state = path+'/'+state+'/'
     agg_year_user = os.listdir(cur_state)
     
     for year in agg_year_user:
@@ -103,13 +106,15 @@ for i in map_dist_trans:
               clm['Year'].append(j)
               clm['Quater'].append(int(k.strip('.json')))
 #Succesfully created a dataframe
-District_Transaction=pd.DataFrame(clm)
+district_Transaction=pd.DataFrame(clm)
 
 =================================================================================================================================================================================================
+path ="/content/pulse/data/map/user/hover/country/india/state"
+map_user_list = os.listdir(map_user_path)
 map_user_detail = {'State':[],'Year':[],'Quarter':[],'District':[],'RegisteredUsers':[],'Appopens':[]}
 
 for state in map_user_list:
-    cur_state = map_user_path+'/'+state+'/'
+    cur_state = path+'/'+state+'/'
     map_year_user = os.listdir(cur_state)
     
     for year in map_year_user:
@@ -132,4 +137,80 @@ for state in map_user_list:
                 map_user_detail['RegisteredUsers'].append(users)
                 map_user_detail['Appopens'].append(appopens)
                 
-map_user = pd.DataFrame(map_user_detail)
+district_user = pd.DataFrame(map_user_detail)
+================================================================================================================================================
+#Pincodewise Transaction
+path="/content/pulse/data/top/transaction/country/india/state/"
+top_trans_list=os.listdir(path)
+top_trans_list
+
+top_trans_detail = {'State': [], 'Year': [], 'Quarter': [], 'Pincode': [], 'Transaction_count': [],
+            'Transaction_amount': []}
+
+for state in top_trans_list:
+    cur_state = path + '/'+state + "/"
+    top_year_trans = os.listdir(cur_state)
+    
+    for year in top_year_trans:
+        cur_year = cur_state + year + "/"
+        top_file_trans = os.listdir(cur_year)
+        
+        for file in top_file_trans:
+            cur_file = cur_year + file
+            data = open(cur_file, 'r')
+            E = json.load(data)
+            
+            for i in E['data']['pincodes']:
+                name = i['entityName']
+                count = i['metric']['count']
+                amount = i['metric']['amount']
+                top_trans_detail['Pincode'].append(name)
+                top_trans_detail['Transaction_count'].append(count)
+                top_trans_detail['Transaction_amount'].append(amount)
+                top_trans_detail['State'].append(state)
+                top_trans_detail['Year'].append(int(year))
+                top_trans_detail['Quarter'].append(int(file.strip('.json')))
+pincode_transaction = pd.DataFrame(top_user_detail)
+================================================================================================================================================
+path ="/content/pulse/data/top/user/country/india/state"
+map_user_list = os.listdir(map_user_path)
+
+map_user_detail = {'State':[],'Year':[],'Quarter':[],'District':[],'RegisteredUsers':[],'Appopens':[]}
+
+for state in map_user_list:
+    cur_state = path+'/'+state+'/'
+    map_year_user = os.listdir(cur_state)
+    
+    for year in map_year_user:
+        cur_year = cur_state+year+'/'       
+        map_file_user = os.listdir(cur_year)
+        
+        for file in map_file_user:
+            cur_file = cur_year+file
+            data = open(cur_file,'r')
+            D = json.load(data)
+            
+            for i in D['data']['hoverData'].items():
+                district = i[0]
+                users = i[1]['registeredUsers']
+                appopens = i[1]['appOpens']
+                map_user_detail['State'].append(state)
+                map_user_detail['Year'].append(int(year))
+                map_user_detail['Quarter'].append(int(file.strip('.json')))
+                map_user_detail['District'].append(district)
+                map_user_detail['RegisteredUsers'].append(users)
+                map_user_detail['Appopens'].append(appopens)
+                
+Pincode_user = pd.DataFrame(map_user_detail)
+
+================================================================================================================================================
+#Saving dataframe as csv file
+
+aggregated_transaction.to_csv('Aggregated_transaction.csv',index=False)
+aggregated_user.to_csv('Aggregated_user.csv',index=False)
+district_transaction.to_csv(District_transaction.csv',index=False)
+district_user.to_csv(District_user.csv',index=False)
+pincode_transaction.to_csv(Pincode_transaction.csv',index=False)
+Pincode_user.to_csv(Pincode_user.csv',index=False)
+
+=================================================================================================================================================
