@@ -1,0 +1,135 @@
+!git clone https://github.com/PhonePe/pulse.git
+=================================================================================================================================================================================================
+#Once created the clone of GIT-HUB repository then,
+#Required libraries for the program
+
+import pandas as pd
+import json
+import os
+
+#This is to direct the path to get the data as states
+#Aggregated transaction
+path="/content/pulse/data/aggregated/transaction/country/india/state/"
+Agg_state_list=os.listdir(path)
+Agg_state_list
+#Agg_state_list--> to get the list of states in India
+
+#This is to extract the data's to create a dataframe
+
+clm={'State':[], 'Year':[],'Quater':[],'Transaction_type':[], 'Transaction_count':[], 'Transaction_amount':[]}
+for i in Agg_state_list:
+    p_i=path+i+"/"
+    Agg_yr=os.listdir(p_i)
+    for j in Agg_yr:
+        p_j=p_i+j+"/"
+        Agg_yr_list=os.listdir(p_j)
+        for k in Agg_yr_list:
+            p_k=p_j+k
+            Data=open(p_k,'r')
+            D=json.load(Data)
+            for z in D['data']['transactionData']:
+              Name=z['name']
+              count=z['paymentInstruments'][0]['count']
+              amount=z['paymentInstruments'][0]['amount']
+              clm['Transaction_type'].append(Name)
+              clm['Transaction_count'].append(count)
+              clm['Transaction_amount'].append(amount)
+              clm['State'].append(i)
+              clm['Year'].append(j)
+              clm['Quater'].append(int(k.strip('.json')))
+#Succesfully created a dataframe
+Aggregated_transaction=pd.DataFrame(clm)
+
+=================================================================================================================================================================================================
+agg_user_detail = {'State':[],'Year':[],'Quarter':[],'Brand':[],'User_Count':[],'User_Percentage':[]}
+
+for state in agg_user_list:
+    cur_state = agg_user_path+'/'+state+'/'
+    agg_year_user = os.listdir(cur_state)
+    
+    for year in agg_year_user:
+        cur_year = cur_state+year+'/'
+        agg_file_user = os.listdir(cur_year)
+        
+        for file in agg_file_user:
+            cur_file = cur_year+file
+            data = open(cur_file,'r')
+            B = json.load(data)
+            
+            try:
+                for i in B['data']['usersByDevice']:
+                    brand = i['brand']
+                    count = i['count']
+                    percent = i['percentage']
+                    agg_user_detail['Brand'].append(brand)
+                    agg_user_detail['User_Count'].append(count)
+                    agg_user_detail['User_Percentage'].append(percent)
+                    agg_user_detail['State'].append(state)
+                    agg_user_detail['Year'].append(int(year))
+                    agg_user_detail['Quarter'].append(int(file.strip('.json')))
+            except:
+                pass
+        # we use try expect method for reason some data value is None 
+aggregated_user = pd.DataFrame(agg_user_detail)
+
+=================================================================================================================================================================================================
+#Districtwise Transactions
+path="/content/pulse/data/map/transaction/hover/country/india/state/"
+map_dist_trans=os.listdir(path)
+map_dist_trans
+#map_dist_trans--> to get the list of states in India
+
+#This is to extract the data's to create a dataframe
+
+clm={'State':[], 'Year':[],'Quater':[],'District':[], 'Transaction_count':[], 'Transaction_amount':[]}
+for i in map_dist_trans:
+    p_i=path+i+"/"
+    map_yr=os.listdir(p_i)
+    for j in map_yr:
+        p_j=p_i+j+"/"
+        map_yr_list=os.listdir(p_j)
+        for k in map_yr_list:
+            p_k=p_j+k
+            Data=open(p_k,'r')
+            D=json.load(Data)
+            for z in D['data']['hoverDataList']:
+              Name=z['name']
+              count=z['metric'][0]['count']
+              amount=z['metric'][0]['amount']
+              clm['District'].append(Name)
+              clm['Transaction_count'].append(count)
+              clm['Transaction_amount'].append(amount)
+              clm['State'].append(i)
+              clm['Year'].append(j)
+              clm['Quater'].append(int(k.strip('.json')))
+#Succesfully created a dataframe
+District_Transaction=pd.DataFrame(clm)
+
+=================================================================================================================================================================================================
+map_user_detail = {'State':[],'Year':[],'Quarter':[],'District':[],'RegisteredUsers':[],'Appopens':[]}
+
+for state in map_user_list:
+    cur_state = map_user_path+'/'+state+'/'
+    map_year_user = os.listdir(cur_state)
+    
+    for year in map_year_user:
+        cur_year = cur_state+year+'/'       
+        map_file_user = os.listdir(cur_year)
+        
+        for file in map_file_user:
+            cur_file = cur_year+file
+            data = open(cur_file,'r')
+            D = json.load(data)
+            
+            for i in D['data']['hoverData'].items():
+                district = i[0]
+                users = i[1]['registeredUsers']
+                appopens = i[1]['appOpens']
+                map_user_detail['State'].append(state)
+                map_user_detail['Year'].append(int(year))
+                map_user_detail['Quarter'].append(int(file.strip('.json')))
+                map_user_detail['District'].append(district)
+                map_user_detail['RegisteredUsers'].append(users)
+                map_user_detail['Appopens'].append(appopens)
+                
+map_user = pd.DataFrame(map_user_detail)
