@@ -57,10 +57,10 @@ def state_user(Q,year):
 
 #function to retrive dristrictwise transaction
 def district_transaction(Q,year): 
-    mycursor.execute("""SELECT district as District, transaction_amount as Transaction_amount, transaction_amount as Amount
+    mycursor.execute("""SELECT district as District, transaction_amount as Amount
                      FROM district_transaction
                      WHERE quater={} and year={}
-                     ORDER BY Transaction_amount DESC
+                     ORDER BY transaction_amount
                      LIMIT 10""".format(Q,year))
     dis_trans = pd.DataFrame(mycursor.fetchall(),columns=mycursor.column_names)
     return dis_trans
@@ -77,7 +77,7 @@ def district_user(Q,year):
 
 #function to retrive pincodewise transaction
 def pincode_transaction(Q,year):
-    mycursor.execute("""SELECT pincode as PostalCode, transaction_amount as Transaction_amount, transaction_amount as Amount
+    mycursor.execute("""SELECT pincode as PostalCode, transaction_amount as Amount
                      FROM pincode_transaction
                      WHERE quater={} and year={}
                      ORDER BY transaction_amount DESC
@@ -97,7 +97,7 @@ def pincode_user(Q,year):
 
 #function to retrive typewise transaction
 def type_transaction(Q,year):
-    mycursor.execute("""SELECT transaction_type as Transaction_type,Transaction_Amount as Amount
+    mycursor.execute("""SELECT transaction_type as Transaction_type,Transaction_Amount as Amount, Transaction_count as Transactions
                      FROM aggregated_transaction
                      WHERE quater={} AND year={}
                      GROUP BY Transaction_type""".format(Q,year) )
@@ -137,7 +137,7 @@ operation=st.selectbox('',options=['AGGREGATED','TYPE','TOP','PRECISE'])
 
 #aggregated analysis
 if operation=='AGGREGATED':
-    option = st.selectbox('',options=['TRANSACTIONS','USERS'])
+    option = st.radio('',options=['TRANSACTIONS','USERS'],horizontal=True)
 
 #transaction analysis
     if option=='TRANSACTIONS':
@@ -173,15 +173,23 @@ if operation=='AGGREGATED':
 
 #type analysis
 if operation =='TYPE':
+    option=st.radio('',options=['Count','Value'],horizontal=True)
     y = st.selectbox('year',options=[2018,2019,2020,2021,2022,2023])
     if y == 2023:
-        q=st.selectbox('Quater',options=[1,2,3])
+        q=st.radio('Quater',options=[1,2,3],horizontal=True)
     elif y == 2018 or y == 2019 or y == 2020 or y == 2021 or y == 2022:
-        q=st.selectbox('Quater',options=[1,2,3,4])
-    tdf = type_transaction(q,y)
-    fig = px.pie(tdf, values='Amount', names='Transaction_type', title='Type of transaction in {}'.format(y))
-    st.plotly_chart(fig)
-    st.write(tdf[['Transaction_type','Amount']])
+        q=st.radio('Quater',options=[1,2,3,4],horizontal=True)
+    if option == 'Value':
+        tdf = type_transaction(q,y)
+        fig = px.pie(tdf, values='Amount', names='Transaction_type', title='Transaction types in {}'.format(y))
+        st.plotly_chart(fig)
+        st.write(tdf[['Transaction_type','Amount']])
+    elif option == 'Count':
+        tdf = type_transaction(q,y)
+        fig = px.pie(tdf, values='Transactions', names='Transaction_type', title='Type of transactions in {}'.format(y))
+        st.plotly_chart(fig)
+        st.write(tdf[['Transaction_type','Transactions']])
+
 
 #top analysis
 if operation =='TOP':
@@ -203,12 +211,13 @@ if operation =='TOP':
             stdf=state_transaction(q,y)
             fig = px.bar(stdf,x="State", y =stdf["Amount"], title = 'Top State Transactions',text_auto=True,orientation='v')
             st.plotly_chart(fig)
-            st.write(stdf[['State','Amount']])
+            st.write(stdf[['State','Amount']],index=False)
         if button2:
             dtdf=district_transaction(q,y)
-            fig = px.bar(dtdf,x="District", y =dtdf["Amount"], title = 'Top District Transactions',text_auto=True,orientation='v')
+            fig = go.Figure(data=[go.Pie(labels=dtdf['District'],values=dtdf['Amount'])])
+            fig.update_traces(hoverinfo='label+percent', textinfo='value', textfont_size=20,marker=dict(line=dict(color='#000000', width=0)))
             st.plotly_chart(fig)
-            st.write(dtdf[['District','Amount']])
+            st.write(dtdf[['District','Amount']],index=False)
         if button3:
             ptdf=pincode_transaction(q,y)
             fig = go.Figure(data=[go.Pie(labels=ptdf['PostalCode'],values=ptdf['Amount'])])
